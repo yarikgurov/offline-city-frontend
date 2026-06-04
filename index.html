@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#06060c">
+  <title>OFFLINE CITY — Системный сбой</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Orbitron:wght@600;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- ============ СТАРТОВЫЙ ЭКРАН (boot) ============ -->
+  <div id="bootScreen" class="boot-screen">
+    <div class="boot-scan"></div>
+    <div class="boot-inner">
+      <pre class="boot-log" id="bootLog"></pre>
+      <div class="boot-reveal" id="bootReveal">
+        <div class="boot-title" data-text="OFFLINE CITY">OFFLINE CITY</div>
+        <div class="boot-sub">ДЕПАРТАМЕНТ СИСТЕМНОЙ БЕЗОПАСНОСТИ</div>
+        <div class="boot-line"></div>
+        <p class="boot-tagline">Город ушёл в офлайн. Сервер лжёт. Найди того, кто за этим стоит.</p>
+        <button class="boot-enter" id="bootEnter">
+          <span class="boot-enter-glow"></span>
+          ВОЙТИ В СИСТЕМУ
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-grid"></div>
+  <div class="bg-orbs" aria-hidden="true"></div>
+  <div class="bg-particles" id="particles"></div>
+  <div class="bg-vignette"></div>
+  <div class="scanline"></div>
+
+  <!-- ============ ПОЛНОЭКРАННЫЙ ФИНАЛ ============ -->
+  <div id="endOverlay" class="end-overlay" aria-hidden="true">
+    <div class="eo-bg"></div>
+    <div class="eo-rays"></div>
+    <div class="eo-particles" id="eoParticles"></div>
+    <div class="eo-content" id="endOverlayContent"></div>
+  </div>
+
+  <div class="game-container">
+
+    <!-- ===== ШАПКА (компактная) ===== -->
+    <header class="header">
+      <div class="header-bar">
+        <div class="logo-block">
+          <h1 class="logo-text">OFFLINE CITY</h1>
+          <span class="logo-sub">Департамент системной безопасности</span>
+        </div>
+        <div class="sys-info">
+          <span class="sys-pill"><span class="sys-pill-dot"></span> OFFLINE</span>
+          <span class="sys-clock" id="sysClock">--:--:--</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== СТРОКА-ОЖИДАНИЕ (главная до старта) ===== -->
+    <div class="idle-strip" id="idleStrip" hidden>СИСТЕМА В РЕЖИМЕ ОЖИДАНИЯ · НАЖМИТЕ «НОВОЕ ДЕЛО»</div>
+
+    <!-- ===== ПАНЕЛЬ СТАТУСОВ ===== -->
+    <div class="status-panel">
+      <div class="status-item shift-status">
+        <div class="status-info">
+          <span class="status-value" id="currentShift">1</span>
+          <span class="status-label">СМЕНА ИЗ 10</span>
+        </div>
+      </div>
+      <div class="status-divider"></div>
+      <div class="status-item trust-status">
+        <div class="status-info trust-info">
+          <span class="status-label">ИНДЕКС ДОВЕРИЯ</span>
+          <div class="trust-bar-wrap">
+            <div class="trust-bar">
+              <div id="trustFill" class="trust-fill"></div>
+            </div>
+            <span class="trust-pct" id="trustValue">100%</span>
+          </div>
+        </div>
+      </div>
+      <div class="status-divider"></div>
+      <div class="status-item">
+        <div class="status-info">
+          <span class="status-value" id="eventsResolved">0</span>
+          <span class="status-label">УЛИК СОБРАНО ИЗ 10</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== НАВИГАЦИЯ: терминальный таббар ===== -->
+    <nav class="page-nav">
+      <span class="nav-sys"><span class="nav-sys-dot"></span>SYS</span>
+      <button class="nav-page-btn active" data-page="main"><span class="nav-idx">01</span>ГЛАВНАЯ</button>
+      <button class="nav-page-btn" data-page="admin"><span class="nav-idx">02</span>АДМ. ПАНЕЛЬ</button>
+      <button class="nav-page-btn" data-page="logs"><span class="nav-idx">03</span>ЖУРНАЛ ОШИБОК</button>
+      <button class="nav-page-btn" data-page="archive"><span class="nav-idx">04</span>АРХИВ ДАННЫХ</button>
+    </nav>
+
+    <!-- ============== СТРАНИЦА 1: ГЛАВНАЯ (брифинг) ============== -->
+    <div class="page-section" id="page-main">
+      <div class="briefing">
+        <div class="brief-left">
+          <div class="dossier-tag">ДЕЛО № 4 — «ОФЛАЙН-ГОРОД» · УРОВЕНЬ ДОСТУПА: КРИТИЧЕСКИЙ</div>
+          <div class="sys-status-row">
+            <div class="sys-status-dot" id="mainStatusDot"></div>
+            <div>
+              <div class="sys-status-title">Состояние системы</div>
+              <div class="sys-status-val" id="mainStatusText">АВАРИЙНЫЙ РЕЖИМ</div>
+            </div>
+          </div>
+          <p class="sys-desc" id="mainStatusDesc">
+            03:14, 14 марта 2031. Городской портал «Офлайн-город» — сердце цифровой
+            инфраструктуры мегаполиса — начал отдавать чужие данные, прошлогодние записи
+            и фантомные ошибки. Канал связи с дата-центром оборван, спасти ситуацию должна была
+            PWA — но именно она ведёт себя враждебно. Ты — дежурный инженер системной
+            безопасности. До утренней пересменки у тебя <strong>10 рабочих циклов</strong>,
+            чтобы собрать <strong>10 улик</strong>, вычислить источник сбоя и удержать
+            доверие горожан выше критической отметки.
+          </p>
+          <div class="dossier-divider"></div>
+          <div class="main-controls">
+            <button id="newGameBtn" class="game-btn btn-new"><span>Новое дело</span></button>
+            <button id="continueBtn" class="game-btn btn-continue"><span>Продолжить</span></button>
+            <button id="resetBtn" class="game-btn btn-reset"><span>Закрыть дело</span></button>
+          </div>
+        </div>
+
+        <div class="brief-right">
+          <div class="mission-panel">
+            <div class="mp-head"><span class="term-dots"><i></i><i></i><i></i></span> ПАРАМЕТРЫ МИССИИ</div>
+            <div class="mp-lines" id="missionLines">
+              <div class="mp-line"><span class="mp-k">ЦЕЛЬ</span><span class="mp-dots"></span><span class="mp-v">собрать 10 улик</span></div>
+              <div class="mp-line"><span class="mp-k">ЦИКЛОВ</span><span class="mp-dots"></span><span class="mp-v">10</span></div>
+              <div class="mp-line"><span class="mp-k">УГРОЗА</span><span class="mp-dots"></span><span class="mp-v danger">КРИТИЧЕСКАЯ</span></div>
+              <div class="mp-line"><span class="mp-k">СТАТУС</span><span class="mp-dots"></span><span class="mp-v warn">ОЖИДАНИЕ</span></div>
+              <div class="mp-line"><span class="mp-k">ОПЕРАТОР</span><span class="mp-dots"></span><span class="mp-v">дежурный инженер</span></div>
+              <div class="mp-line"><span class="mp-k">КАНАЛ</span><span class="mp-dots"></span><span class="mp-v danger">ОБОРВАН</span></div>
+              <div class="mp-line"><span class="mp-k">ПОДОЗРЕВАЕМЫЙ</span><span class="mp-dots"></span><span class="mp-v">неизвестен</span></div>
+            </div>
+            <div class="mp-foot"><span class="mp-cursor">▋</span> <span id="mpFoot">ожидание команды оператора...</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============== СТРАНИЦА 2: АДМ. ПАНЕЛЬ (HUD) ============== -->
+    <div class="page-section" id="page-admin" hidden>
+      <div class="progress-tracker" id="progressTracker"></div>
+      <div class="main-grid">
+        <section class="event-panel terminal-frame">
+          <div class="term-titlebar">
+            <span class="term-dots"><i></i><i></i><i></i></span>
+            <span class="term-path" id="termPath">sys://incident/shift_1</span>
+            <span class="term-live">● REC</span>
+          </div>
+          <div class="panel-header">
+            <span class="panel-title">АКТИВНЫЙ ИНЦИДЕНТ</span>
+            <span class="panel-badge" id="eventBadge">СМЕНА 1</span>
+          </div>
+          <div id="eventCard" class="event-content">
+            <div class="loading-state">
+              <div class="loading-spinner"></div>
+              <p>Подключение к системе...</p>
+            </div>
+          </div>
+          <div id="choicesContainer" class="choices-area"></div>
+        </section>
+
+        <aside class="side-panels">
+          <div class="clues-panel">
+            <div class="side-tabs">
+              <button class="side-tab active" data-tab="log">ЖУРНАЛ</button>
+              <button class="side-tab" data-tab="clues">УЛИКИ <span class="side-tab-count" id="sideClueCount">0</span></button>
+            </div>
+            <div id="actionLogMini" class="log-list side-tab-pane" data-pane="log">
+              <div class="log-empty-state"><span class="le-cursor">_</span> ОЖИДАНИЕ ДАННЫХ</div>
+            </div>
+            <div id="sideClues" class="log-list side-tab-pane" data-pane="clues" hidden>
+              <div class="log-empty-state"><span class="le-cursor">_</span> УЛИКИ НЕ СОБРАНЫ</div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- ============== СТРАНИЦА 3: ЖУРНАЛ ОШИБОК ============== -->
+    <div class="page-section" id="page-logs" hidden>
+      <div class="logs-page">
+        <!-- Системный журнал -->
+        <div class="logs-block">
+          <div class="logs-block-header">
+            <span class="logs-block-title">СИСТЕМНЫЙ ЖУРНАЛ</span>
+            <div class="log-filters">
+              <button class="log-filter-btn active" data-filter="all">Все</button>
+              <button class="log-filter-btn" data-filter="info">INFO</button>
+              <button class="log-filter-btn" data-filter="warning">WARNING</button>
+              <button class="log-filter-btn" data-filter="error">ERROR</button>
+            </div>
+          </div>
+          <div class="sys-log-list" id="sysLogList">
+            <div class="sys-log-entry" data-level="error"><span class="sle-time">06:12:04</span><span class="sle-level error">ERROR</span><span class="sle-msg">Канал связи с дата-центром потерян. Активирован аварийный режим PWA.</span></div>
+            <div class="sys-log-entry" data-level="warning"><span class="sle-time">06:14:22</span><span class="sle-level warning">WARNING</span><span class="sle-msg">Service Worker <code>v2.7-security</code> блокирует синхронизацию кэша.</span></div>
+            <div class="sys-log-entry" data-level="error"><span class="sle-time">06:30:01</span><span class="sle-level error">ERROR</span><span class="sle-msg">API endpoint /api/users возвращает данные из устаревшего кэша (δ = 311 дней).</span></div>
+            <div class="sys-log-entry" data-level="warning"><span class="sle-time">07:02:18</span><span class="sle-level warning">WARNING</span><span class="sle-msg">Зафиксированы POST-запросы на внешний домен: <code>data-collector.unknown-host.io</code></span></div>
+            <div class="sys-log-entry" data-level="error"><span class="sle-time">07:15:44</span><span class="sle-level error">ERROR</span><span class="sle-msg">Жалобы пользователей: личные кабинеты пусты. Кол-во обращений: 247.</span></div>
+            <div class="sys-log-entry" data-level="info"><span class="sle-time">07:48:11</span><span class="sle-level info">INFO</span><span class="sle-msg">Подрядчик не отвечает на запросы поддержки (2-й день).</span></div>
+            <div class="sys-log-entry" data-level="warning"><span class="sle-time">08:05:33</span><span class="sle-level warning">WARNING</span><span class="sle-msg">Интерфейс портала отображает удалённые данные и старые изображения 2030 года.</span></div>
+            <div class="sys-log-entry" data-level="error"><span class="sle-time">08:42:55</span><span class="sle-level error">ERROR</span><span class="sle-msg">Service Worker игнорирует команду <code>skipWaiting()</code>. Обновление кэша заблокировано.</span></div>
+            <div class="sys-log-entry" data-level="warning"><span class="sle-time">09:01:12</span><span class="sle-level warning">WARNING</span><span class="sle-msg">В соцсетях обсуждение: «Портал ворует данные». Индекс доверия снижается.</span></div>
+            <div class="sys-log-entry" data-level="info"><span class="sle-time">09:30:00</span><span class="sle-level info">INFO</span><span class="sle-msg">Рекомендация: проверить архив — найти отчёт <code>v2.7-security</code>.</span></div>
+          </div>
+        </div>
+
+        <!-- Журнал действий игрока -->
+        <div class="logs-block">
+          <div class="logs-block-header">
+            <span class="logs-block-title">ЖУРНАЛ ДЕЙСТВИЙ</span>
+          </div>
+          <div id="actionLog" class="log-list action-log-scroll">
+            <div class="empty-state">Система ожидает действий</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============== СТРАНИЦА 4: АРХИВ ДАННЫХ ============== -->
+    <div class="page-section" id="page-archive" hidden>
+      <div class="archive-page">
+        <div class="panel-header" style="margin-bottom:20px">
+          <span class="panel-title">АРХИВ УЛИК</span>
+          <span class="panel-count" id="clueCount">0/10</span>
+        </div>
+        <div id="cluesList" class="clues-list archive-clues">
+          <div class="empty-state">Нет записей в базе</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Скрытые элементы для совместимости с app.js -->
+    <div style="display:none" aria-hidden="true">
+      <button id="tabClues"></button>
+      <button id="tabLog"></button>
+      <div id="panelClues"></div>
+      <div id="panelLog"></div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+  </div>
+
+  <script src="app.js?v=7"></script>
+</body>
+</html>

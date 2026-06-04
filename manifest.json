@@ -1,0 +1,19 @@
+{
+  "name": "Offline City",
+  "short_name": "OfflineCity",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#e94560",
+  "icons": [
+    {
+      "src": "evil-city.ru/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ],
+  "serviceworker": {
+    "src": "sw.js",
+    "scope": "/"
+  }
+}
